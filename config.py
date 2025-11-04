@@ -5,4 +5,4 @@ load_dotenv()
 
 
 SECRET_KEY = os.getenv('SECRET_KEY','dev-secret-key-please-change-in-production')
-EXPIRATION =os.getenv('EXPIRES_IN_HOURS',24)
+EXPIRATION =int(os.getenv('EXPIRES_IN_HOURS',24))
