@@ -1,0 +1,20 @@
+services:
+  # PostgreSQL Database for dynamic data
+  realtime_chat:
+    image: postgres:15-alpine
+    container_name: realtime-chat-db
+    environment:
+      POSTGRES_DB: realtime_chat
+      POSTGRES_USER: chatuser
+      POSTGRES_PASSWORD: chatpassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+
+ # Define volumes
+volumes:
+  postgres_data:
+    driver: local
