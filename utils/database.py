@@ -4,6 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 from dotenv import load_dotenv
 
+
 load_dotenv()
 if DATABASE_URL is None:
     raise ValueError("DATABASE_URL environment variable is not set!")
@@ -20,3 +21,8 @@ def get_db():
         yield db
     finally:
         db.close()
+
+def init_db():
+    from models import Conversation,Message,ConversationParticipant
+    Base.metadata.create_all(engine)
+    print("Database tables are created sucessfully")

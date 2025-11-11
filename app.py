@@ -19,6 +19,10 @@ def create_app():
     app.config['SECRET_KEY'] = SECRET_KEY
     CORS(app)
     socketio.init_app(app)
+
+    from utils.database import init_db
+    with app.app_context():
+         init_db()
     return app
 
 active_users = {}
