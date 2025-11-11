@@ -7,12 +7,19 @@ from config import SECRET_KEY
 
 from datetime import datetime
 
-app = Flask(__name__)
-app.config['SECRET_KEY'] = SECRET_KEY
+# app = Flask(__name__)
+# app.config['SECRET_KEY'] = SECRET_KEY
 
-CORS(app)
 
-socketio = SocketIO(app,cors_allowed_origins="*",async_mode='eventlet')
+
+socketio = SocketIO(cors_allowed_origins="*",async_mode='eventlet')
+
+def create_app():
+    app = Flask(__name__)
+    app.config['SECRET_KEY'] = SECRET_KEY
+    CORS(app)
+    socketio.init_app(app)
+    return app
 
 active_users = {}
 socket_to_user = {}
@@ -59,6 +66,7 @@ def handle_ping(data):
     
     
 if __name__ == "__main__":
+    app = create_app()
     print("🚀 Starting Socket.IO server...")
     print(f"📡 Server running on http://localhost:5000")
     print(f"🔐 JWT authentication enabled")
