@@ -10,22 +10,36 @@
         <div id ="status">Not Connected</div>
 
         <script>
-            let socket = null;
-            function connect() {
-                socket = io('http://localhost:5000');
-                
-                socket.on('connect', () => {
-                    document.getElementById('status').textContent = 'Connected!';
-                    console.log('Connected',socket.id);
-                });
-                socket.on('disconnect',() => {
-                    document.getElementById('status').textContent = 'disconnected!';
-                    console.log('disconnected',socket.id)
-                });
+        let socket;
+        function connect() {
+            const token = prompt('Enter JWT token:');
+    
+            socket = io('http://localhost:5000', {
+            auth: {
+                token: token
             }
-            function disconnect() {
-                if (socket) socket.disconnect();
+            });
+    
+         socket.on('connect', () => {
+            document.getElementById('status').textContent = 'Connected!';
+            console.log('Connected to server');
+            });
+
+        socket.on('authenticated', (data) => {
+            console.log('Authenticated:', data);
+        });
+
+        socket.on('disconnect', () => {
+            document.getElementById('status').textContent = 'Disconnected';
+            console.log('Disconnected from server');
+        });
+        }
+        
+        function disconnect() {
+            if (socket) {
+                socket.disconnect();
             }
+        }
         </script>
     </body>
 </html>
