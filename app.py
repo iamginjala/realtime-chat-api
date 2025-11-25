@@ -2,6 +2,7 @@ from flask import Flask, render_template,request
 from flask_socketio import SocketIO, disconnect, emit
 from flask_cors import CORS
 from utils.jwt_helper import decode_token
+from datetime import datetime
 
 socketio = SocketIO()
 
@@ -52,6 +53,9 @@ def handle_disconnect():
     if user_id:
         del active_users[user_id]
         print(f"👋 User {user_id} disconnected")
+@socketio.on('ping')
+def handle_ping():
+    emit('pong', {'timestamp': datetime.now().isoformat()})
 
 if __name__ == '__main__':
     app = create_app()

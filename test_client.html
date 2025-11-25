@@ -7,6 +7,7 @@
     <body>
         <button onclick="connect()">Connect</button>
         <button onclick="disconnect()">DisConnect</button>
+        <button onclick="sendPing()">Send Ping</button>
         <div id ="status">Not Connected</div>
 
         <script>
@@ -40,6 +41,19 @@
                 socket.disconnect();
             }
         }
+
+        function sendPing() {
+            if (socket && socket.connected) {
+            socket.emit('ping');
+            console.log('🏓 Ping sent');
+            } else {
+                alert('Not connected!');
+        }
+        }
+
+        socket.on('pong', (data) => {
+            console.log('🏓 Pong received:', data);
+        });
         </script>
     </body>
 </html>
