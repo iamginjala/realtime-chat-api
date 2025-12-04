@@ -1,9 +1,8 @@
-from models.message import db,Message
-from models.participant import User
-from models.conversation import Conversation
+from models import db, User, Conversation, Message
 from datetime import datetime
+from typing import Optional
 
-def get_or_create_conversation(user1_id, user2_id):
+def get_or_create_conversation(user1_id: int, user2_id: int) -> Conversation:
     """
     Get existing conversation between two users or create a new one.
     Always ensures user1_id < user2_id.
@@ -21,8 +20,8 @@ def get_or_create_conversation(user1_id, user2_id):
     # Create if doesn't exist
     if not conversation:
         conversation = Conversation(
-            user1_id=user1_id,
-            user2_id=user2_id
+            user1_id=user1_id, # type: ignore
+            user2_id=user2_id # type: ignore
         )
         db.session.add(conversation)
         db.session.commit()
@@ -31,15 +30,15 @@ def get_or_create_conversation(user1_id, user2_id):
     return conversation
 
 
-def save_message(conversation_id, sender_id, content):
+def save_message(conversation_id: int, sender_id: int, content: str) -> Message:
     """
     Save a new message to the database.
     """
     message = Message(
-        conversation_id=conversation_id,
-        sender_id=sender_id,
-        content=content,
-        sent_at=datetime.utcnow()
+        conversation_id=conversation_id, # type: ignore
+        sender_id=sender_id, # type: ignore
+        content=content, # type: ignore
+        sent_at=datetime.utcnow() # type: ignore
     )
     
     db.session.add(message)
@@ -54,7 +53,7 @@ def save_message(conversation_id, sender_id, content):
     return message
 
 
-def mark_message_delivered(message_id):
+def mark_message_delivered(message_id: int) -> bool:
     """
     Mark a message as delivered.
     """
