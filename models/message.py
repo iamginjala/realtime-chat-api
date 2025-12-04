@@ -1,11 +1,5 @@
-from flask_sqlalchemy import SQLAlchemy
+from models.database import db
 from datetime import datetime
-
-
-
-
-db = SQLAlchemy()
-
 
 class Message(db.Model):
     __tablename__ = 'messages'
