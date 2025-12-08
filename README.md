@@ -358,9 +358,9 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## 👨‍💻 Author
 
 **Your Name**
-- GitHub: [@yourusername](https://github.com/yourusername)
-- LinkedIn: [Your Name](https://linkedin.com/in/yourprofile)
-- Email: your.email@example.com
+- GitHub: [@iamginjala](https://www.github.com/iamginjala)
+- LinkedIn: [Harsha Ginjala](https://www.linkedin.com/in/harsha-vardhan-reddy-ginjala-a6a026146/)
+- Email: harsha.v.ginjala@gmail.com
 
 ---
 
@@ -382,13 +382,5 @@ This project was built as part of a learning journey to understand:
 - Database schema design for chat applications
 - Authentication patterns for WebSocket connections
 - Horizontal scaling with Redis pub/sub
-
----
-
-## 🐛 Known Issues & Roadmap
-
-See [ISSUES.md](ISSUES.md) for current known issues and planned improvements.
-
----
 
 **⭐ Star this repo if you find it helpful!**
