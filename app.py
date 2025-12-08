@@ -6,7 +6,7 @@ from datetime import datetime
 from config import Config
 from models import db, User, Conversation, Message
 
-from utils.database import get_or_create_conversation, save_message, mark_message_delivered
+from utils.database import get_or_create_conversation, save_message, mark_message_delivered,get_undelivered_messages
 
 
 socketio = SocketIO()
@@ -48,8 +48,26 @@ def handle_connect(auth):
         payload = decode_token(token)
         user_id = payload.get('user_id')
 
+        if not user_id:
+            print('❌ Connection rejected: Invalid token')
+            return False
+
         active_users[user_id] = request.sid # type: ignore
-        
+
+        # Deliver undelivered messages
+        undelivered = get_undelivered_messages(user_id)
+        if undelivered:
+            print(f"📬 Delivering {len(undelivered)} queued messages to user {user_id}")
+            for message in undelivered:
+                emit('new_message', {
+                    'message_id': message.id,
+                    'conversation_id': message.conversation_id,
+                    'from_user_id': message.sender_id,
+                    'content': message.content,
+                    'sent_at': message.sent_at.isoformat()
+                })
+                mark_message_delivered(message.id)
+
         print(f"✅ User {user_id} connected with socket {request.sid}") # type: ignore
         
         emit('authenticated', {'user_id': user_id, 'message': 'Authentication successful'})

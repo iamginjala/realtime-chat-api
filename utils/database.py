@@ -63,3 +63,28 @@ def mark_message_delivered(message_id: int) -> bool:
         db.session.commit()
         return True
     return False
+
+def get_undelivered_messages(user_id: int) -> list[Message]:
+    """
+    Get all undelivered messages for a user.
+    Returns messages where the user is a participant but message hasn't been delivered.
+    """
+    # Find all conversations where user is a participant
+    conversations = Conversation.query.filter(
+        (Conversation.user1_id == user_id) | (Conversation.user2_id == user_id)
+    ).all()
+
+    if not conversations:
+        return []
+
+    # Get conversation IDs
+    c_ids = [c.id for c in conversations]
+
+    # Find undelivered messages
+    undelivered = Message.query.filter(
+        Message.conversation_id.in_(c_ids),
+        Message.sender_id != user_id,
+        Message.delivered_at.is_(None)
+    ).order_by(Message.sent_at).all()
+
+    return undelivered
