@@ -5,8 +5,9 @@ from utils.jwt_helper import decode_token
 from datetime import datetime
 from config import Config
 from models import db, User, Conversation, Message
-
-from utils.database import get_or_create_conversation, save_message, mark_message_delivered,get_undelivered_messages
+from functools import wraps
+from flask import jsonify
+from utils.database import get_or_create_conversation, save_message, mark_message_delivered,get_undelivered_messages,get_conversation_messages,mark_messages_as_read
 
 
 socketio = SocketIO()
@@ -32,7 +33,125 @@ def create_app():
     @app.route('/health')
     def health():
         return {'status': 'ok', 'database': 'connected'}
+
+    @app.route('/api/conversations', methods=['GET'])
+    @jwt_required
+    def get_conversations(user_id):
+        """
+        Get all conversations for the authenticated user
+        """
+        try:
+            conversations = Conversation.query.filter(
+                (Conversation.user1_id == user_id) | (Conversation.user2_id == user_id)
+            ).all()
+            result = []
+
+            for conv in conversations:
+                other_user_id = conv.user2_id if conv.user1_id == user_id else conv.user1_id
+                last_message = Message.query.filter_by(
+                    conversation_id=conv.id
+                ).order_by(Message.sent_at.desc()).first()
+
+                unread_count = Message.query.filter(
+                    Message.conversation_id == conv.id,
+                    Message.sender_id != user_id,
+                    Message.read_at.is_(None)
+                ).count()
+
+                conv_data = {
+                    'conversation_id': conv.id,
+                    'other_user_id': other_user_id,
+                    'last_message': None,
+                    'unread_count': unread_count,
+                    'updated_at': conv.updated_at.isoformat()
+                }
+
+                if last_message:
+                    conv_data['last_message'] = {
+                        'content': last_message.content,
+                        'sent_at': last_message.sent_at.isoformat(),
+                        'sender_id': last_message.sender_id
+                    }
+                result.append(conv_data)
+            return jsonify({'conversations': result}), 200
+
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
     
+    @app.route('/api/messages', methods=['GET'])
+    @jwt_required
+    def get_messages(user_id):
+        """
+        Get message history for a conversation with pagination.
+        Query params: conversation_id,limit,offset
+        """
+        try:
+            conversation_id = request.args.get('conversation_id', type=int)
+            limit = request.args.get('limit', default=50, type=int)
+            offset = request.args.get('offset', default=0, type=int)
+
+            if not conversation_id:
+                return jsonify({'error': 'conversation_id is required'}), 400
+
+            # Check if user is part of this conversation
+            conversation = Conversation.query.filter(
+                Conversation.id == conversation_id,
+                ((Conversation.user1_id == user_id) | (Conversation.user2_id == user_id))
+            ).first()
+
+            if not conversation:
+                return jsonify({'error': 'Conversation not found or access denied'}), 404
+
+            # Get messages
+            messages, total = get_conversation_messages(conversation_id, limit, offset)
+
+            # Convert messages to dict
+            messages_data = [msg.to_dict() for msg in messages]
+
+            # Calculate has_more
+            has_more = (offset + limit) < total
+
+            return jsonify({
+                'messages': messages_data,
+                'total': total,
+                'has_more': has_more
+            }), 200
+
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+
+    @app.route('/api/messages/read', methods=['POST'])
+    @jwt_required
+    def mark_read(user_id):
+        """
+        Mark all unread messages in a conversation as read.
+        Query params: conversation_id
+        """
+        try:
+            conversation_id = request.args.get('conversation_id', type=int)
+            if not conversation_id:
+                return jsonify({'error': 'conversation_id is required'}), 400
+
+            # Check if user is part of this conversation
+            conversation = Conversation.query.filter(
+                Conversation.id == conversation_id,
+                ((Conversation.user1_id == user_id) | (Conversation.user2_id == user_id))
+            ).first()
+
+            if not conversation:
+                return jsonify({'error': 'Conversation not found or access denied'}), 404
+
+            count = mark_messages_as_read(conversation_id, user_id)
+
+            return jsonify({
+                'success': True,
+                'messages_marked': count
+            }), 200
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500 
+
+
+
     return app
 
 active_users = {}
@@ -165,6 +284,26 @@ def handle_send_message(data):
         print(f"❌ Error sending message: {str(e)}")
         emit('error', {'message': f'Failed to send message: {str(e)}'})
 
+def jwt_required(f):
+    """Decorator to require JWT authentication for REST endpoints"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+
+        auth_header = request.headers.get('Authorization')
+        if not auth_header:
+            return jsonify({'error': 'No Authorization Header'}), 401
+
+        try:
+            token = auth_header.split(' ')[1] if ' ' in auth_header else auth_header
+            payload = decode_token(token)
+
+            if not payload:
+                return jsonify({'error': 'Invalid token'}), 401
+
+            return f(user_id=payload.get('user_id'), *args, **kwargs)
+        except Exception as e:
+            return jsonify({'error': str(e)}), 401
+    return decorated_function
 
 
 if __name__ == '__main__':

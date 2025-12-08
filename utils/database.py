@@ -88,3 +88,36 @@ def get_undelivered_messages(user_id: int) -> list[Message]:
     ).order_by(Message.sent_at).all()
 
     return undelivered
+
+def get_conversation_messages(conversation_id: int, limit: int = 50,offset: int = 0):
+    """ Get messages from a conversation with pagination.
+        Returns messages ordered by sent_at (newest first).
+    """
+    messages = Message.query.filter_by(conversation_id=conversation_id).order_by(Message.sent_at.desc()).limit(limit).offset(offset).all()
+
+    total = Message.query.filter_by(conversation_id=conversation_id).count()
+
+    return messages,total
+
+def mark_messages_as_read(conversation_id: int, user_id: int) -> int:
+    """
+    Mark all unread messages in a conversation as read for the given user.
+    Returns the number of messages marked as read.
+    """
+    # Find all unread messages in this conversation that were NOT sent by the user
+    unread_messages = Message.query.filter(
+        Message.conversation_id == conversation_id,
+        Message.sender_id != user_id,
+        Message.read_at.is_(None)
+    ).all()
+
+    # Mark them as read
+    count = 0
+    for message in unread_messages:
+        message.read_at = datetime.utcnow()
+        count += 1
+
+    if count > 0:
+        db.session.commit()
+
+    return count
