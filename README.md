@@ -206,7 +206,7 @@ Mark all unread messages as read
 
 1. **Clone the repository**
 ```bash
-git clone https://github.com/yourusername/realtime-chat-api.git
+git clone https://github.com/iamginjala/realtime-chat-api.git
 cd realtime-chat-api
 ```
 
