@@ -194,7 +194,7 @@ Mark all unread messages as read
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### **Prerequisites**
 - Python 3.8+
