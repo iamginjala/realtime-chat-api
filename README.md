@@ -1,16 +1,16 @@
-# 💬 Realtime Chat API
+# Realtime Chat API
 
 A production-ready WhatsApp-style messaging backend built with Flask, Socket.IO, PostgreSQL, and Redis. This project demonstrates scalable real-time communication architecture with horizontal scaling capabilities.
 
 ---
 
-## 🎯 Project Overview
+## Project Overview
 
 A high-performance real-time messaging API that handles bidirectional communication, message persistence, user presence tracking, and group chat functionality. Built to scale across multiple servers using Redis pub/sub architecture.
 
 ---
 
-## 🚀 Key Features & Technical Achievements
+##  Key Features & Technical Achievements
 
 ### 1. **WebSocket Scaling via Redis Pub/Sub Architecture**
 - Implemented Redis pub/sub for horizontal scalability across multiple server instances
@@ -65,7 +65,7 @@ A high-performance real-time messaging API that handles bidirectional communicat
 
 ---
 
-## 🏗️ Architecture Highlights
+##  Architecture Highlights
 
 ### **Scalability Design**
 ```
@@ -105,7 +105,7 @@ A high-performance real-time messaging API that handles bidirectional communicat
 
 ---
 
-## 📊 Database Schema
+##  Database Schema
 
 ### **Conversations Table**
 ```sql
@@ -141,7 +141,7 @@ A high-performance real-time messaging API that handles bidirectional communicat
 
 ---
 
-## 🔧 Technical Stack
+##  Technical Stack
 
 | Category | Technologies |
 |----------|-------------|
@@ -154,7 +154,7 @@ A high-performance real-time messaging API that handles bidirectional communicat
 
 ---
 
-## 📡 API Endpoints
+##  API Endpoints
 
 ### **WebSocket Events**
 
